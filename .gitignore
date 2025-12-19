@@ -45,3 +45,7 @@ mascotbot-sdk-react-*.tgz
 # Rive files (paid content - users must add their own)
 public/*.riv
 *.riv
+
+# Log files
+logs.txt
+*.log

@@ -6,7 +6,6 @@ import {
   Alignment,
   Fit,
   MascotClient,
-  MascotProvider,
   MascotRive,
   useMascot,
   useMascotElevenlabs,
@@ -288,9 +287,10 @@ function WidgetWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export default function Home() {
-  // Add your mascot widget .riv file to the public folder
+  // Widget Rive file - place your mascot_widget.riv in the public folder
   // Available with Mascot Bot SDK subscription
   // Note: Widget Rive files have "_widget" suffix and use the "Widget" artboard
+  // You can also use a CDN URL: "https://your-cdn.com/mascot_widget.riv"
   const mascotUrl = "/mascot_widget.riv";
 
   // Dynamic variables to pass to the ElevenLabs agent
@@ -319,33 +319,31 @@ export default function Home() {
   }, []);
 
   return (
-    <MascotProvider>
-      <WidgetWrapper>
-        <MascotClient
-          src={mascotUrl}
-          artboard="Widget"
-          shouldDisableRiveListeners={false}
-          inputs={[
-            "gesture",
-            "is_speaking",
-            "is_connected",
-            "is_connecting",
-            "reveal",
-            "hit",
-            "character",
-            "glasses",
-            "suit-skin",
-            "hair-skin",
-          ]}
-          layout={{
-            fit: Fit.Contain,
-            alignment: Alignment.BottomRight,
-          }}
-        >
-          <ElevenLabsWidgetContent dynamicVariables={dynamicVariables} />
-          <MascotRive showLoadingSpinner={false} />
-        </MascotClient>
-      </WidgetWrapper>
-    </MascotProvider>
+    <WidgetWrapper>
+      <MascotClient
+        src={mascotUrl}
+        artboard="Widget"
+        shouldDisableRiveListeners={false}
+        inputs={[
+          "gesture",
+          "is_speaking",
+          "is_connected",
+          "is_connecting",
+          "reveal",
+          "hit",
+          "character",
+          "glasses",
+          "suit-skin",
+          "hair-skin",
+        ]}
+        layout={{
+          fit: Fit.Contain,
+          alignment: Alignment.BottomRight,
+        }}
+      >
+        <ElevenLabsWidgetContent dynamicVariables={dynamicVariables} />
+        <MascotRive showLoadingSpinner={false} />
+      </MascotClient>
+    </WidgetWrapper>
   );
 }

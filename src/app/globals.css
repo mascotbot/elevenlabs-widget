@@ -66,3 +66,22 @@ canvas {
 .fixed > * {
   pointer-events: auto !important;
 }
+
+/*
+ * Fix height inheritance for SDK containers inside fixed positioning.
+ * The SDK uses h-full (height: 100%) but this doesn't cascade properly
+ * through fixed positioning context. These rules ensure the height
+ * chain remains unbroken from the fixed container to the canvas.
+ */
+.fixed > div,
+.fixed > div > div,
+.fixed > div > div > div,
+.fixed > div > div > div > div {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+.fixed canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
