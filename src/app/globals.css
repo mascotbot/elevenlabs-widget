@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Override all backgrounds to be transparent */
+html {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+body {
+  background: transparent !important;
+  background-color: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Override Tailwind's default backgrounds */
+body::before,
+body::after {
+  display: none !important;
+}
+
+/* Ensure Next.js root div is transparent */
+#__next {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Override any theme/dark mode backgrounds */
+.dark,
+.light,
+[data-theme] {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Make sure no element has a background */
+div,
+main,
+section,
+article {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Reset all pointer events to ensure nothing is blocked */
+* {
+  pointer-events: auto !important;
+  cursor: auto !important; /* Reset cursor to default */
+}
+
+/* Ensure Rive canvas is interactive but with default cursor */
+canvas {
+  cursor: auto !important;
+  user-select: none !important;
+}
+
+/* Make sure the fixed container doesn't block anything */
+.fixed {
+  pointer-events: none !important;
+}
+
+/* But allow children of fixed to be interactive */
+.fixed > * {
+  pointer-events: auto !important;
+}
