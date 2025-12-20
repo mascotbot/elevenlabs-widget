@@ -10,16 +10,27 @@ Embeddable voice chat widget powered by ElevenLabs conversational AI and Mascotb
 2. **Embed on any website** with one script tag
 3. Users click the widget button to start a voice conversation
 
+## Important: SDK Not Included
+
+**The Mascotbot SDK package is NOT included in this repository.** You must add it separately after cloning:
+
+1. Obtain `mascotbot-sdk-react-X.X.X.tgz` from your [Mascotbot subscription](https://app.mascot.bot)
+2. Copy the `.tgz` file to the project root
+3. Run `pnpm install`
+
+This is required before building or deploying.
+
 ## Quick Start
 
 ### 1. Deploy
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmascotbot%2Felevenlabs-widget&env=MASCOT_BOT_API_KEY,ELEVENLABS_API_KEY,ELEVENLABS_AGENT_ID&envDescription=API%20keys%20required%20for%20ElevenLabs%20widget%20integration&envLink=https%3A%2F%2Fdocs.mascot.bot%2Flibraries%2Felevenlabs-widget&project-name=elevenlabs-widget&repository-name=elevenlabs-widget)
 
-After deploying:
-1. Add the Mascotbot SDK package (`mascotbot-sdk-react-0.1.7.tgz`) to your repo
-2. Add your mascot `.riv` file to the `public` folder
-3. Commit and push to trigger a rebuild
+After cloning your deployed repo:
+1. Add the Mascotbot SDK package (`mascotbot-sdk-react-X.X.X.tgz`) to your repo root
+2. Add your mascot widget `.riv` file to the `public` folder
+3. Run `pnpm install`
+4. Commit and push to trigger a rebuild
 
 ### 2. Embed
 
@@ -160,6 +171,11 @@ Your widget `.riv` file needs:
 - `endCall` - User clicks end button
 
 ## Troubleshooting
+
+**Build fails with "frozen-lockfile" error?**
+- Delete `pnpm-lock.yaml` and `node_modules`
+- Re-run `pnpm install` to regenerate the lockfile
+- Commit the new lockfile
 
 **Widget not appearing?**
 - Check browser console for errors
