@@ -45,26 +45,10 @@ article {
   background-color: transparent !important;
 }
 
-/* Reset all pointer events to ensure nothing is blocked */
-* {
-  pointer-events: auto !important;
-  cursor: auto !important; /* Reset cursor to default */
-}
-
-/* Ensure Rive canvas is interactive but with default cursor */
+/* Rive canvas styling */
 canvas {
-  cursor: auto !important;
+  cursor: default !important;
   user-select: none !important;
-}
-
-/* Make sure the fixed container doesn't block anything */
-.fixed {
-  pointer-events: none !important;
-}
-
-/* But allow children of fixed to be interactive */
-.fixed > * {
-  pointer-events: auto !important;
 }
 
 /*
@@ -72,11 +56,12 @@ canvas {
  * The SDK uses h-full (height: 100%) but this doesn't cascade properly
  * through fixed positioning context. These rules ensure the height
  * chain remains unbroken from the fixed container to the canvas.
+ * Excludes overlay elements marked with data-overlay attribute.
  */
-.fixed > div,
-.fixed > div > div,
-.fixed > div > div > div,
-.fixed > div > div > div > div {
+.fixed > div:not([data-overlay]),
+.fixed > div:not([data-overlay]) > div,
+.fixed > div:not([data-overlay]) > div > div,
+.fixed > div:not([data-overlay]) > div > div > div {
   height: 100% !important;
   min-height: 100% !important;
 }

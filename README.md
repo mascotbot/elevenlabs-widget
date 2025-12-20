@@ -1,363 +1,186 @@
-# ElevenLabs Widget Integration Demo
+# ElevenLabs Voice Widget
 
-Complete open-source example for integrating embeddable animated widget avatars with ElevenLabs conversational AI using Mascotbot SDK. Features transparent background, Rive-controlled interactions, and real-time lip sync.
+Embeddable voice chat widget powered by ElevenLabs conversational AI and Mascotbot SDK. Deploy once, embed anywhere with a single script tag.
 
-![ElevenLabs Widget Integration Demo](https://mascotbot-app.s3.amazonaws.com/rive-assets/og_assets/preview-widget.png)
+![ElevenLabs Widget](https://mascotbot-app.s3.amazonaws.com/rive-assets/og_assets/preview-widget.png)
 
-## 🎯 Widget vs Avatar
+## How It Works
 
-This is the **widget** version of the ElevenLabs integration, designed for embedding in other applications:
+1. **Deploy this repo** with your ElevenLabs credentials
+2. **Embed on any website** with one script tag
+3. Users click the widget button to start a voice conversation
 
-| Feature | Widget (this repo) | [Avatar](https://github.com/mascotbot/elevenlabs-avatar) |
-|---------|-------------------|-----------------------------------------------------------|
-| Background | Transparent (embeddable) | Full-page with background |
-| Controls | Rive-controlled (in-animation buttons) | HTML buttons |
-| Position | Bottom-right corner | Centered |
-| Use Case | Embed in existing apps/websites | Standalone demo page |
+## Quick Start
 
-## 🚀 Quick Start
+### 1. Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmascotbot%2Felevenlabs-widget&env=MASCOT_BOT_API_KEY,ELEVENLABS_API_KEY,ELEVENLABS_AGENT_ID&envDescription=API%20keys%20required%20for%20ElevenLabs%20widget%20integration&envLink=https%3A%2F%2Fdocs.mascot.bot%2Flibraries%2Felevenlabs-widget&project-name=elevenlabs-widget-demo&repository-name=elevenlabs-widget-demo)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmascotbot%2Felevenlabs-widget&env=MASCOT_BOT_API_KEY,ELEVENLABS_API_KEY,ELEVENLABS_AGENT_ID&envDescription=API%20keys%20required%20for%20ElevenLabs%20widget%20integration&envLink=https%3A%2F%2Fdocs.mascot.bot%2Flibraries%2Felevenlabs-widget&project-name=elevenlabs-widget&repository-name=elevenlabs-widget)
 
-**After deploying with Vercel:**
-1. Add the Mascotbot SDK package (`mascotbot-sdk-react-0.1.7.tgz`) to your cloned repository
-2. Add your mascot widget `.riv` file to the `public` folder (widget files have `_widget` suffix)
-3. Commit and push these changes to trigger a rebuild
+After deploying:
+1. Add the Mascotbot SDK package (`mascotbot-sdk-react-0.1.7.tgz`) to your repo
+2. Add your mascot `.riv` file to the `public` folder
+3. Commit and push to trigger a rebuild
+
+### 2. Embed
+
+Add this script tag to any website:
+
+```html
+<script src="https://your-deployed-widget.vercel.app/widget-embed.js"></script>
+```
+
+That's it! The widget appears in the bottom-right corner with click-through behavior - your page remains fully interactive.
+
+## Embed Options
+
+### Custom Sizes
+
+```html
+<script
+  src="https://your-widget.vercel.app/widget-embed.js"
+  data-widget-width="400"
+  data-widget-height="500">
+</script>
+```
+
+### Responsive (Mobile + Desktop)
+
+```html
+<script
+  src="https://your-widget.vercel.app/widget-embed.js"
+  data-widget-width="350"
+  data-widget-height="450"
+  data-widget-mobile-width="280"
+  data-widget-mobile-height="350"
+  data-widget-mobile-breakpoint="768">
+</script>
+```
+
+### All Options
+
+| Attribute | Default | Description |
+|-----------|---------|-------------|
+| `data-widget-url` | Auto-detected | Override the widget URL |
+| `data-widget-width` | 350 | Desktop width in pixels |
+| `data-widget-height` | 450 | Desktop height in pixels |
+| `data-widget-mobile-width` | Same as desktop | Mobile width in pixels |
+| `data-widget-mobile-height` | Same as desktop | Mobile height in pixels |
+| `data-widget-mobile-breakpoint` | 768 | Viewport width to switch to mobile |
+
+## Character Customization
+
+Customize the mascot appearance in `src/app/page.tsx`:
+
+```typescript
+const WIDGET_CUSTOMIZATION = {
+  gender: 1,              // 1 = male, 2 = female
+  outline: 10,            // 0-100 stroke thickness
+  colourful: true,        // true = colorful, false = monochrome
+  flip: false,            // Mirror the character
+  crop: false,            // Show background circle
+  bg_color: 0,            // 0-10 background color (when crop=true)
+  shirt_color: 2,         // 1-6 shirt color variant
+  eyes_type: 2,           // 1-2 eye style
+  hair_style: 1,          // 1-3 hair style
+  accessories_hue: 0,     // 0-360 accessory color hue
+  accessories_saturation: 0,
+  accessories_brightness: 0,
+};
+```
+
+## Manual Setup
 
 ### Prerequisites
 
 - Node.js 18+
-- Mascotbot SDK (provided as `.tgz` file after subscription)
-- Mascot Widget `.riv` file (widget version with `_widget` suffix, provided with SDK subscription)
+- Mascotbot SDK (`.tgz` file from subscription)
+- Mascot Widget `.riv` file
 - ElevenLabs API key and Agent ID
-- Mascotbot API key
 
-### Manual Installation
+### Installation
 
-1. Clone this repository:
 ```bash
+# Clone
 git clone https://github.com/mascotbot/elevenlabs-widget.git
 cd elevenlabs-widget
-```
 
-2. Copy the Mascotbot SDK package to the project root:
-```bash
+# Add SDK
 cp /path/to/mascotbot-sdk-react-0.1.7.tgz ./
-```
 
-3. Copy your mascot widget .riv file to the public folder:
-```bash
-cp /path/to/mascot_widget.riv ./public/
-```
+# Add mascot file
+cp /path/to/mascot-widget.riv ./public/
 
-4. Install dependencies:
-```bash
-npm install
-# or
+# Install
 pnpm install
-```
 
-5. Set up environment variables:
-```bash
+# Configure
 cp .env.example .env.local
 ```
 
-6. Update `.env.local` with your credentials:
-```env
-MASCOT_BOT_API_KEY=your_mascot_bot_api_key
-ELEVENLABS_API_KEY=your_elevenlabs_api_key
-ELEVENLABS_AGENT_ID=your_elevenlabs_agent_id
-```
-
-7. Run the development server:
-```bash
-npm run dev
-# or
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see the widget in action!
-
-## 🎯 What This Demo Shows
-
-This example demonstrates:
-
-- **Transparent Background**: Widget designed to be overlaid on any content
-- **Rive-Controlled Interactions**: Start/end calls via animated buttons in the Rive file
-- **Real-time Lip Sync**: Perfect viseme synchronization with ElevenLabs audio streams
-- **WebSocket Integration**: Automatic data extraction from ElevenLabs connections
-- **Natural Mouth Movements**: Human-like lip sync processing
-- **Dynamic Variables**: Pass custom data to your ElevenLabs agent
-- **Production-Ready Components**: Complete implementation ready for embedding
-
-## 📁 Project Structure
-
-```
-elevenlabs-widget/
-├── src/
-│   ├── app/
-│   │   ├── page.tsx          # Main widget page with transparent background
-│   │   ├── layout.tsx        # Root layout with transparency support
-│   │   ├── globals.css       # Styles ensuring full transparency
-│   │   └── api/
-│   │       └── get-signed-url/
-│   │           └── route.ts  # API endpoint for ElevenLabs authentication
-│   └── components/           # Additional components (if needed)
-├── public/                   # Static assets (place mascot_widget.riv here)
-├── .env.example             # Environment variables template
-├── package.json             # Project dependencies
-└── README.md               # This file
-```
-
-## 🔧 Key Features
-
-### 1. Transparent Background
-
-The widget is designed with full transparency, allowing it to be embedded over any content:
-
-```css
-/* Automatic transparency applied to all elements */
-html, body, div, main {
-  background: transparent !important;
-}
-```
-
-### 2. Rive-Controlled Interactions
-
-Unlike the avatar version with HTML buttons, the widget responds to events from the Rive animation:
-
-```typescript
-// Listen for Rive events
-rive.on(EventType.RiveEvent, (riveEvent) => {
-  if (eventName === "startCall") {
-    startConversation();
-  } else if (eventName === "endCall") {
-    stopConversation();
-  }
-});
-```
-
-Your widget Rive file should emit these events:
-- `startCall` - When user clicks the call button in the animation
-- `endCall` - When user clicks the end button in the animation
-
-### 3. Widget-Specific Rive Inputs
-
-The widget uses additional Rive inputs for state management:
-
-```typescript
-inputs={[
-  "gesture",        // Trigger for animated reactions
-  "is_speaking",    // Boolean for lip sync
-  "is_connected",   // Boolean for connection state
-  "is_connecting",  // Boolean for connecting state
-  "reveal",         // Trigger for initial reveal animation
-  "hit",            // Trigger for agent-ended-call animation
-  "character",      // Optional: character selection
-  "glasses",        // Optional: accessory toggles
-  "suit-skin",      // Optional: customization
-  "hair-skin",      // Optional: customization
-]}
-```
-
-### 4. Dynamic Variables
-
-Pass custom data to your ElevenLabs agent:
-
-```typescript
-const dynamicVariables = {
-  name: "User",
-  company: "Acme Corp",
-  // Add variables matching your agent's configuration
-};
-
-// Variables are passed both at session start and URL generation
-await conversation.startSession({
-  signedUrl,
-  dynamicVariables: dynamicVariables,
-});
-```
-
-### 5. Natural Lip Sync Processing
-
-```typescript
-// Human-like mouth movements with configurable parameters
-const [lipSyncConfig] = useState({
-  minVisemeInterval: 40,
-  mergeWindow: 60,
-  keyVisemePreference: 0.6,
-  preserveSilence: true,
-  similarityThreshold: 0.4,
-  preserveCriticalVisemes: true,
-  criticalVisemeMinDuration: 80,
-});
-
-useMascotElevenlabs({
-  conversation,
-  naturalLipSync: true,
-  naturalLipSyncConfig: lipSyncConfig,
-});
-```
-
-### 6. Pre-fetched URLs for Instant Connection
-
-The widget pre-fetches signed URLs and refreshes them every 9 minutes, ensuring instant connection when users interact with the widget.
-
-## 🛠️ Customization
-
-### Using Your Own Widget Avatar
-
-The widget expects a mascot widget .riv file in the public folder. Widget files typically have a `_widget` suffix:
-
-```typescript
-const mascotUrl = "/mascot_widget.riv"; // Widget version of your mascot
-```
-
-You can also use a CDN URL:
-```typescript
-const mascotUrl = "https://your-cdn.com/your-mascot_widget.riv";
-```
-
-### Widget Rive File Requirements
-
-Your widget Rive file should have:
-
-**Artboard**: `Widget` (not `Character`)
-
-**Inputs**:
-- `is_speaking` - Boolean input for lip sync
-- `is_connected` - Boolean for connection state
-- `is_connecting` - Boolean for connecting state
-- `reveal` - Trigger for initial reveal animation
-- `hit` - Trigger for agent-ended-call reaction
-- `gesture` - Optional trigger for animated reactions
-
-**Events**:
-- `startCall` - Emitted when user clicks start button
-- `endCall` - Emitted when user clicks end button
-
-### Adjusting Position and Size
-
-```typescript
-// Modify the WidgetWrapper component
-<div
-  className="fixed bottom-0 right-0"
-  style={{
-    width: "100vh",    // Adjust size
-    height: "100vh",   // Adjust size
-    backgroundColor: "transparent",
-  }}
->
-```
-
-### Changing Alignment
-
-```typescript
-layout={{
-  fit: Fit.Contain,
-  alignment: Alignment.BottomRight, // Or BottomLeft, Center, etc.
-}}
-```
-
-## 📝 Environment Variables
-
-Create a `.env.local` file with the following variables:
+Edit `.env.local`:
 
 ```env
-# Mascotbot API Key (get from app.mascot.bot)
 MASCOT_BOT_API_KEY=mascot_xxxxxxxxxxxxxx
-
-# ElevenLabs Credentials
 ELEVENLABS_API_KEY=sk_xxxxxxxxxxxxxx
 ELEVENLABS_AGENT_ID=agent_xxxxxxxxxxxxxx
 ```
 
-## 🚨 Important Notes
+Run:
 
-### Widget vs Avatar Rive Files
-
-Widget Rive files are different from avatar Rive files:
-- Widget files have `_widget` suffix (e.g., `mascot_widget.riv`)
-- Widget files use the `Widget` artboard
-- Widget files have embedded UI controls (buttons in the animation)
-- Widget files emit Rive events for interaction
-
-### WebSocket Proxy Requirement
-
-**Do NOT connect directly to ElevenLabs WebSocket URLs**. The avatar lip-sync requires viseme data that only the Mascotbot proxy provides.
-
-### Browser Requirements
-
-- Modern browser with WebGL2 support
-- Microphone access for voice interaction
-- Stable internet connection for WebSocket streaming
-
-### Embedding the Widget
-
-The widget can be embedded in an iframe or directly in your application:
-
-```html
-<!-- Iframe embedding -->
-<iframe
-  src="https://your-widget-url.com"
-  style="
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 400px;
-    height: 400px;
-    border: none;
-    background: transparent;
-    pointer-events: none;
-  "
-  allow="microphone"
-></iframe>
+```bash
+pnpm dev
 ```
 
-## 🐛 Troubleshooting
+## How the Embed Works
 
-### Widget Not Appearing?
+The widget uses a click-through iframe pattern:
 
-1. Check if using the widget Rive file (with `_widget` suffix)
-2. Verify the artboard is set to `Widget`
-3. Check browser console for loading errors
+- **Default state**: Widget is visible but clicks pass through to your page
+- **Button hover**: Only the voice chat button area is interactive
+- **Active call**: Full widget becomes interactive during conversations
 
-### Buttons Not Working?
+This means buttons, links, and other elements on your page work normally - even if they're visually "under" the widget.
 
-1. Ensure your Rive file emits `startCall` and `endCall` events
-2. Check console for "Rive event received" logs
-3. Verify `shouldDisableRiveListeners={false}` is set
+## Rive File Requirements
 
-### Background Not Transparent?
+Your widget `.riv` file needs:
 
-1. Check that globals.css is being imported
-2. Verify no parent container is adding a background
-3. When embedding in iframe, ensure iframe has `background: transparent`
+**Artboard**: `Widget`
 
-### Connection Failed?
+**Inputs**:
+- `is_speaking` - Boolean for lip sync
+- `is_connected` - Boolean for connection state
+- `is_connecting` - Boolean for connecting state
+- `reveal` - Trigger for initial animation
+- `hit` - Trigger for call-ended animation
+- `gesture` - Trigger for reactions
 
-1. Verify your API keys are correct
-2. Check that your ElevenLabs agent is active
-3. Ensure microphone permissions are granted
-4. Look for errors in the browser console
+**Events** (emitted by Rive):
+- `startCall` - User clicks start button
+- `endCall` - User clicks end button
 
-## 📚 Documentation
+## Troubleshooting
 
-For complete documentation on the Mascotbot SDK and all available features, visit:
+**Widget not appearing?**
+- Check browser console for errors
+- Verify `.riv` file is in `/public`
+- Ensure artboard is set to `Widget`
+
+**Clicks not working?**
+- Verify Rive file emits `startCall`/`endCall` events
+- Check `shouldDisableRiveListeners={false}` is set
+
+**Connection failed?**
+- Verify API keys in `.env.local`
+- Check ElevenLabs agent is active
+- Grant microphone permissions
+
+## Links
+
 - [Mascotbot Documentation](https://docs.mascot.bot)
 - [ElevenLabs Integration Guide](https://docs.mascot.bot/integrations/elevenlabs)
-- [Widget-Specific Guide](https://docs.mascot.bot/integrations/elevenlabs-widget)
-
-## 📄 License
-
-This demo is provided as an open-source example for Mascotbot subscribers. You're free to use, modify, and deploy it as needed for your projects.
-
-## 🤝 Support
-
-- For SDK issues: support@mascot.bot
-- For ElevenLabs issues: [ElevenLabs Support](https://elevenlabs.io/support)
-- Community: [Discord Server](https://discord.gg/SBxfyPXD)
+- [Support](mailto:support@mascot.bot)
 
 ---
 
-Built with ❤️ by the Mascotbot team
+Built with Mascotbot SDK

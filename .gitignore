@@ -49,3 +49,7 @@ public/*.riv
 # Log files
 logs.txt
 *.log
+dev-logs*.txt
+
+# Test files
+public/test-embed.html

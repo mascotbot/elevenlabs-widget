@@ -6,6 +6,7 @@ import {
   Alignment,
   Fit,
   MascotClient,
+  MascotProvider,
   MascotRive,
   useMascot,
   useMascotElevenlabs,
@@ -13,12 +14,50 @@ import {
 import { EventType, RiveEventType } from "@rive-app/react-webgl2";
 import "./globals.css";
 
+// ============================================================================
+// WIDGET CUSTOMIZATION CONFIG
+// ============================================================================
+// Customize your widget's appearance by modifying these values.
+// These settings are applied on page load.
+//
+// For NotionGuy/NotionPeople avatars:
+// - gender: 1 (male) or 2 (female)
+// - outline: 0-100 (stroke thickness)
+// - colourful: true/false (colorful vs monochrome)
+// - flip: true/false (mirror the character)
+// - crop: true/false (show background circle)
+// - bg_color: 0-10 (background color, only when crop=true)
+// - shirt_color: 1-6 (shirt color variant)
+// - eyes_type: 1-2 (eye style)
+// - hair_style: 1-3 (hair style, 3=with accessories)
+// - accessories_hue: 0-360 (accessory color hue, only when hair_style=3)
+// - accessories_saturation: 0-100 (accessory saturation, only when hair_style=3)
+// - accessories_brightness: 0-100 (accessory brightness, only when hair_style=3)
+//
+// ============================================================================
+
+const WIDGET_CUSTOMIZATION = {
+  gender: 1, // 1 = male, 2 = female
+  outline: 10,
+  colourful: true,
+  flip: false,
+  crop: false,
+  bg_color: 0,
+  shirt_color: 2,
+  eyes_type: 2,
+  hair_style: 3,
+  accessories_hue: 0,
+  accessories_saturation: 0,
+  accessories_brightness: 100,
+};
+
 interface ElevenLabsWidgetContentProps {
   dynamicVariables?: Record<string, string | number | boolean>;
+  customization?: typeof WIDGET_CUSTOMIZATION;
 }
 
 // Widget content component that uses hooks inside MascotClient
-function ElevenLabsWidgetContent({ dynamicVariables }: ElevenLabsWidgetContentProps) {
+function ElevenLabsWidgetContent({ dynamicVariables, customization = WIDGET_CUSTOMIZATION }: ElevenLabsWidgetContentProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [cachedUrl, setCachedUrl] = useState<string | null>(null);
   const urlRefreshInterval = useRef<NodeJS.Timeout | null>(null);
@@ -94,6 +133,12 @@ function ElevenLabsWidgetContent({ dynamicVariables }: ElevenLabsWidgetContentPr
       if (customInputs?.is_connecting) {
         customInputs.is_connecting.value = false;
       }
+    },
+    onMessage: () => {
+      // Empty handler to prevent SDK errors
+    },
+    onDebug: () => {
+      // Empty handler to prevent SDK errors
     },
   });
 
@@ -210,6 +255,23 @@ function ElevenLabsWidgetContent({ dynamicVariables }: ElevenLabsWidgetContentPr
     await conversation.endSession();
   }, [conversation]);
 
+  // Apply customization settings when customInputs become available
+  useEffect(() => {
+    if (!customInputs) return;
+
+    // Apply all customization values directly
+    Object.entries(customization).forEach(([key, value]) => {
+      if (customInputs[key]) {
+        customInputs[key].value = value;
+      }
+    });
+
+    // Legacy alias: "character" mirrors "gender"
+    if (customInputs.character) {
+      customInputs.character.value = customization.gender;
+    }
+  }, [customInputs, customization]);
+
   // Fire reveal trigger after page loads
   useEffect(() => {
     if (!rive || !customInputs) return;
@@ -266,14 +328,105 @@ function ElevenLabsWidgetContent({ dynamicVariables }: ElevenLabsWidgetContentPr
     };
   }, [rive, conversation.status, isConnecting, startConversation, stopConversation]);
 
+  // Listen for postMessage from embed script (for tap/click on mobile and desktop)
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'widget-tap') {
+        console.log('[Widget] Received tap via postMessage', event.data);
+        // Toggle conversation on tap
+        if (conversation.status === 'connected') {
+          isUserInitiatedEnd.current = true;
+          stopConversation();
+        } else if (!isConnecting) {
+          startConversation();
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [conversation.status, isConnecting, startConversation, stopConversation]);
+
   // The widget is entirely controlled by Rive, so we just render the mascot
   return null; // MascotRive will be rendered at the parent level
 }
 
 // Widget wrapper component with transparent background
+// When embedded as iframe, this tracks mouse position and notifies parent when leaving button area
 function WidgetWrapper({ children }: { children: React.ReactNode }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Track if we're embedded in an iframe - use state to avoid hydration mismatch
+  // Start with false (matches server render), then update after mount
+  const [isEmbedded, setIsEmbedded] = useState(false);
+
+  // Button area dimensions (percentage of container) - must match embed script
+  const BUTTON_WIDTH_PERCENT = 0.5;  // 50% from right
+  const BUTTON_HEIGHT_PERCENT = 0.2; // 20% from bottom
+
+  // Check if embedded after hydration
+  useEffect(() => {
+    setIsEmbedded(window.parent !== window);
+  }, []);
+
+  // Track mouse movement and notify parent when leaving button area
+  useEffect(() => {
+    if (!isEmbedded) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    let isInButtonArea = false;
+
+    const checkButtonArea = (clientX: number, clientY: number) => {
+      // Use viewport dimensions (which match iframe dimensions when embedded)
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      const buttonLeft = viewportWidth - (viewportWidth * BUTTON_WIDTH_PERCENT);
+      const buttonTop = viewportHeight - (viewportHeight * BUTTON_HEIGHT_PERCENT);
+
+      return clientX >= buttonLeft && clientX <= viewportWidth &&
+             clientY >= buttonTop && clientY <= viewportHeight;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const wasInButtonArea = isInButtonArea;
+      isInButtonArea = checkButtonArea(e.clientX, e.clientY);
+
+      // If mouse just left the button area, notify parent
+      if (wasInButtonArea && !isInButtonArea) {
+        window.parent.postMessage({ type: 'widget-mouse-left-button' }, '*');
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (isInButtonArea) {
+        isInButtonArea = false;
+        window.parent.postMessage({ type: 'widget-mouse-left-button' }, '*');
+      }
+    };
+
+    // Track mouse on the entire document to catch all movements
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
+
+    // Also listen for mouseenter to set initial state when mouse enters widget
+    const handleMouseEnter = (e: MouseEvent) => {
+      isInButtonArea = checkButtonArea(e.clientX, e.clientY);
+    };
+    document.addEventListener('mouseenter', handleMouseEnter);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      document.removeEventListener('mouseenter', handleMouseEnter);
+    };
+  }, [isEmbedded]);
+
   return (
     <div
+      ref={containerRef}
       className="fixed bottom-0 right-0"
       style={{
         width: "100vh",
@@ -281,7 +434,32 @@ function WidgetWrapper({ children }: { children: React.ReactNode }) {
         backgroundColor: "transparent",
       }}
     >
+      {/* Rive canvas renders here at full size - receives pointer events */}
       {children}
+
+      {/*
+        Click blocker ONLY when NOT embedded.
+        When embedded, the parent page's embed script handles click-through behavior.
+        When viewing directly, this blocker prevents clicks outside the button area.
+      */}
+      {!isEmbedded && (
+        <div
+          data-overlay
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "auto",
+            clipPath: `polygon(
+              0% 0%,
+              100% 0%,
+              100% 85%,
+              60% 85%,
+              60% 100%,
+              0% 100%
+            )`,
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -291,7 +469,7 @@ export default function Home() {
   // Available with Mascot Bot SDK subscription
   // Note: Widget Rive files have "_widget" suffix and use the "Widget" artboard
   // You can also use a CDN URL: "https://your-cdn.com/mascot_widget.riv"
-  const mascotUrl = "/mascot_widget.riv";
+  const mascotUrl = "/mascot-notionpeople.riv";
 
   // Dynamic variables to pass to the ElevenLabs agent
   // These can be customized based on your agent's configuration
@@ -319,31 +497,49 @@ export default function Home() {
   }, []);
 
   return (
-    <WidgetWrapper>
-      <MascotClient
-        src={mascotUrl}
-        artboard="Widget"
-        shouldDisableRiveListeners={false}
-        inputs={[
-          "gesture",
-          "is_speaking",
-          "is_connected",
-          "is_connecting",
-          "reveal",
-          "hit",
-          "character",
-          "glasses",
-          "suit-skin",
-          "hair-skin",
-        ]}
-        layout={{
-          fit: Fit.Contain,
-          alignment: Alignment.BottomRight,
-        }}
-      >
-        <ElevenLabsWidgetContent dynamicVariables={dynamicVariables} />
-        <MascotRive showLoadingSpinner={false} />
-      </MascotClient>
-    </WidgetWrapper>
+    <MascotProvider>
+      <main className="flex h-svh flex-col overflow-hidden">
+        <WidgetWrapper>
+          <MascotClient
+            src={mascotUrl}
+            artboard="Widget"
+            shouldDisableRiveListeners={false}
+            inputs={[
+              // Core widget inputs
+              "gesture",
+              "is_speaking",
+              "is_connected",
+              "is_connecting",
+              "reveal",
+              "hit",
+              // Customization inputs
+              "gender",
+              "character", // legacy alias for gender
+              "outline",
+              "colourful",
+              "flip",
+              "crop",
+              "bg_color",
+              "shirt_color",
+              "eyes_type",
+              "hair_style",
+              "accessories_hue",
+              "accessories_saturation",
+              "accessories_brightness",
+            ]}
+            layout={{
+              fit: Fit.Contain,
+              alignment: Alignment.BottomRight,
+            }}
+          >
+            <ElevenLabsWidgetContent
+              dynamicVariables={dynamicVariables}
+              customization={WIDGET_CUSTOMIZATION}
+            />
+            <MascotRive showLoadingSpinner={false} />
+          </MascotClient>
+        </WidgetWrapper>
+      </main>
+    </MascotProvider>
   );
 }
