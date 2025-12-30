@@ -194,7 +194,7 @@ Your widget `.riv` file needs:
 ## Links
 
 - [Mascotbot Documentation](https://docs.mascot.bot)
-- [ElevenLabs Integration Guide](https://docs.mascot.bot/integrations/elevenlabs)
+- [ElevenLabs Integration Guide](https://docs.mascot.bot/libraries/elevenlabs-avatar)
 - [Support](mailto:support@mascot.bot)
 
 ---
