@@ -2,7 +2,7 @@
 
 Embeddable voice chat widget powered by ElevenLabs conversational AI and Mascotbot SDK. Deploy once, embed anywhere with a single script tag.
 
-![ElevenLabs Widget](https://mascotbot-app.s3.amazonaws.com/rive-assets/og_assets/preview-widget.png)
+![ElevenLabs Widget](https://mascotbot-app.s3.amazonaws.com/rive-assets/og_assets/voice_widget_cover.jpg)
 
 ## How It Works
 
